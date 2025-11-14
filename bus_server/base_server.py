@@ -30,7 +30,6 @@ class ClientConnection:
     async def send(self, message_id: str, args: Optional[dict] = None) -> bool:
         """Send a message to this client."""
         try:
-            print(f"SENDING TO {self.client_id}: message_id='{message_id}' args={args}")
             data = serialize(message_id, args)
 
             # Check if writer is still connected
