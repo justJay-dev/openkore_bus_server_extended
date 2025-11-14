@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    ports:
+      - "9020:9020"
+      - "8020:8020"
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
