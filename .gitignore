@@ -63,3 +63,9 @@ Thumbs.db
 
 # Configuration files with sensitive data
 config.ini
+
+# local scripts
+patch.sh
+Makefile
+busCommands
+server.log

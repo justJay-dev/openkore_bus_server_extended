@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Bus Server Status - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="info-grid">
+    <div class="info-card">
+        <h3>Server Status</h3>
+        <div class="value">
+            <span class="status {{ 'running' if server_running else 'stopped' }}">
+                {{ 'Running' if server_running else 'Stopped' }}
+            </span>
+        </div>
+    </div>
+    
+    <div class="info-card">
+        <h3>Host Address</h3>
+        <div class="value">{{ server_host }}</div>
+    </div>
+    
+    <div class="info-card">
+        <h3>Port</h3>
+        <div class="value">{{ server_port }}</div>
+    </div>
+    
+    <div class="info-card">
+        <h3>Connected Clients</h3>
+        <div class="value">{{ client_count }}</div>
+    </div>
+    
+    <div class="info-card">
+        <h3>API Port</h3>
+        <div class="value">{{ api_port }}</div>
+    </div>
+    
+    <div class="info-card">
+        <h3>Uptime</h3>
+        <div class="value">{{ uptime or 'N/A' }}</div>
+    </div>
+</div>
+
+{% if clients %}
+<div class="client-list">
+    <h2>Connected Clients</h2>
+    {% for client in clients %}
+    <div class="client-item">
+        <div class="name">{{ client.name or 'Unnamed' }}</div>
+        <div class="id">ID: {{ client.client_id }} | State: {{ client.state }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<button class="refresh-btn" onclick="window.location.reload()">Refresh Status</button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-refresh every 30 seconds
+    setTimeout(function() {
+        window.location.reload();
+    }, 30000);
+</script>
+{% endblock %}

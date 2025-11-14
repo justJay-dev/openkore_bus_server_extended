@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Broadcast Interface - {{ super() }}{% endblock %}
+
+{% block content %}
+<h2>Broadcast Message Interface</h2>
+
+<form id="broadcastForm" class="broadcast-form">
+    <div class="form-group">
+        <label for="player">Target Player:</label>
+        <input type="text" id="player" name="player" required placeholder="Enter player name or 'ALL' for broadcast">
+        <small>Enter a specific player name/userAgent, or use 'ALL', '*', 'EVERYONE', or 'BROADCAST' to send to all clients</small>
+    </div>
+    
+    <div class="form-group">
+        <label for="comm">Command/Message:</label>
+        <input type="text" id="comm" name="comm" required placeholder="Enter message to send">
+    </div>
+    
+    <div class="form-group">
+        <label for="type">Message Type:</label>
+        <select id="type" name="type">
+            <option value="command">Command (busComm) - Execute as command</option>
+            <option value="message">Message (busCM) - Display only</option>
+        </select>
+        <small>Choose whether to send as an executable command or display-only message</small>
+    </div>
+    
+    <div class="form-group">
+        <label for="additional">Additional Parameters (optional):</label>
+        <textarea id="additional" name="additional" placeholder='{"key": "value"}'></textarea>
+        <small>Enter additional parameters as JSON</small>
+    </div>
+    
+    <button type="submit" class="submit-btn">Send Message</button>
+</form>
+
+<div id="result" class="result-area" style="display: none;">
+    <h3>Response:</h3>
+    <pre id="responseContent"></pre>
+</div>
+
+<div class="current-clients">
+    <h3>Currently Connected Clients: <span id="clientCount">{{ client_count }}</span></h3>
+    <button onclick="refreshClients()" class="refresh-btn">Refresh Client Count</button>
+</div>
+
+<style>
+.broadcast-form {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: 20px 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    height: 80px;
+    resize: vertical;
+}
+
+.form-group small {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.submit-btn {
+    background: #28a745;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.submit-btn:hover {
+    background: #218838;
+}
+
+.result-area {
+    margin-top: 30px;
+    padding: 20px;
+    background: #e9ecef;
+    border-radius: 8px;
+}
+
+.result-area pre {
+    background: #343a40;
+    color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+.current-clients {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('broadcastForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const player = document.getElementById('player').value;
+    const comm = document.getElementById('comm').value;
+    const type = document.getElementById('type').value;
+    const additional = document.getElementById('additional').value;
+    
+    let params = `player=${encodeURIComponent(player)}&comm=${encodeURIComponent(comm)}&type=${encodeURIComponent(type)}`;
+
+    
+    // Add additional parameters if provided
+    if (additional) {
+        try {
+            const additionalObj = JSON.parse(additional);
+            for (const [key, value] of Object.entries(additionalObj)) {
+                params += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+            }
+        } catch (e) {
+            alert('Invalid JSON in additional parameters');
+            return;
+        }
+    }
+    
+    try {
+        const response = await fetch(`/bc?${params}`);
+        const result = await response.json();
+        
+        document.getElementById('responseContent').textContent = JSON.stringify(result, null, 2);
+        document.getElementById('result').style.display = 'block';
+        
+        // Refresh client count
+        refreshClients();
+    } catch (error) {
+        document.getElementById('responseContent').textContent = 'Error: ' + error.message;
+        document.getElementById('result').style.display = 'block';
+    }
+});
+
+async function refreshClients() {
+    try {
+        const response = await fetch('/api/status');
+        const data = await response.json();
+        document.getElementById('clientCount').textContent = data.client_count;
+    } catch (error) {
+        console.error('Failed to refresh client count:', error);
+    }
+}
+</script>
+{% endblock %}

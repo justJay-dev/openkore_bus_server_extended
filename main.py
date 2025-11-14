@@ -15,18 +15,26 @@ import sys
 
 async def main():
     """Main entry point for the bus server."""
-    parser = argparse.ArgumentParser(description='OpenKore Bus Server Extended')
-    parser.add_argument('--port', type=int, default=8020, 
-                       help='Port to bind server (default: 8020)')
-    parser.add_argument('--bind', type=str, default='127.0.0.1',
-                       help='IP address to bind server (default: 127.0.0.1)')
-    parser.add_argument('--api-port', type=int, default=None,
-                       help='Port for API server (default: main port + 1000)')
-    parser.add_argument('--quiet', action='store_true',
-                       help='Suppress status messages')
-    
+    parser = argparse.ArgumentParser(description="OpenKore Bus Server Extended")
+    parser.add_argument(
+        "--port", type=int, default=8020, help="Port to bind server (default: 8020)"
+    )
+    parser.add_argument(
+        "--bind",
+        type=str,
+        default="0.0.0.0",
+        help="IP address to bind server (default: 0.0.0.0)",
+    )
+    parser.add_argument(
+        "--api-port",
+        type=int,
+        default=None,
+        help="Port for API server (default: main port + 1000)",
+    )
+    parser.add_argument("--quiet", action="store_true", help="Suppress status messages")
+
     args = parser.parse_args()
-    
+
     # Show startup banner (unless quiet mode)
     if not args.quiet:
         print()
@@ -42,21 +50,18 @@ async def main():
         print("⚡ Press Ctrl+C to stop")
         print("=" * 60)
         print()
-    
+
     # Create and start the server with API
     server = BusServerWithAPI(
-        port=args.port, 
-        bind=args.bind, 
-        quiet=args.quiet,
-        api_port=args.api_port
+        port=args.port, bind=args.bind, quiet=args.quiet, api_port=args.api_port
     )
-    
+
     try:
         await server.start()
-        
+
         # Keep the server running
         await server.run_forever()
-        
+
     except KeyboardInterrupt:
         if not args.quiet:
             print("\n👋 Shutting down gracefully...")
